@@ -45,6 +45,15 @@ mov dl, byte[boot_drive]
 call disk_read
 jc disk_error
 
+xor ax, ax
+mov bx, ax
+mov cx, ax
+xor dh, dh
+mov dl, byte[boot_drive]
+mov di, ax
+mov si, ax
+mov fs, ax
+mov gs, ax
 jmp kernel_address
 
 disk_error:
@@ -56,7 +65,7 @@ jmp $
 %include "src/console.asm"
 %include "src/disk.asm"
 
-boot_message: db "Started BIOS-BOOTLOADER rev. 001", 0
+boot_message: db "Started BIOS-BOOTLOADER rev. 002", 0
 date_message: db "Software dated Oct. 01, 2023", 0
 
 disk_error_message: db "ERROR: Unable to load data from disk", 0
