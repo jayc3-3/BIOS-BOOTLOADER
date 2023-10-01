@@ -11,6 +11,8 @@ First off, machine state. How does the bootloader leave the computer?
 All registers (except for DL) are set to zero before control is handed to the operating system.
 The DL register is set to the BIOS boot drive (that is, the drive the computer booted from).
 
+SP and BP are set to 0x7C00, so there is 0x7700 bytes of stack space. Plenty for any reasonable person.
+
 Next, how does it load the kernel?
 Well, it just loads the second sector from the disk into memory at 0x8000, and jumps to there.
 
