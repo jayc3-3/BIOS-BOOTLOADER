@@ -19,5 +19,5 @@ Well, it just loads the second sector from the disk into memory at 0x8000, and j
 So all a working kernel needs is to run in 16-bit real mode with a global memory offset of 0x8000 (achieved in NASM with the 'org' directive).
 After all of that, you've sucessfully launched a 16-bit kernel with a garbage bootloader! Congratulations!
 
-Also please note that it loads 32, and only 32, sectors from the disk. Having less than this could possibly cause problems, and having more will definitely cause problems.
+Also please note that it loads 32, and only 32, sectors from the disk from LBA 1. Having less than this could possibly cause problems, and having more will definitely cause problems.
 Make sure to have a disk reading function, for all your post-32 sector needs (or you can use the one here)
