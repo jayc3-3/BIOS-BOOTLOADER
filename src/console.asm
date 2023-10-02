@@ -1,6 +1,6 @@
 ;
 ; BIOS-BOOTLOADER
-; Simple single-sector BIOS bootloader
+; A simple BIOS bootloader
 ;
 ; https://github.com/jayc3-3/BIOS-BOOTLOADER
 ; Free for use and/or modification
