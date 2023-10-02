@@ -13,6 +13,8 @@ The DL register is set to the BIOS boot drive (that is, the drive the computer b
 
 SP and BP are set to 0x7C00, so there is 0x7700 bytes of stack space. Plenty for any reasonable person.
 
+The A20 line is enabled (if it cannot be enabled, bootloader will halt)
+
 Next, how does it load the kernel?
 Well, it just loads the second sector from the disk into memory at 0x8000, and jumps to there.
 
