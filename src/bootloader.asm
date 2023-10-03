@@ -14,6 +14,32 @@
 org 0x7C00
 bits 16
 
+jmp short skip_fat
+nop
+
+db "BIOSBTLR"
+dw 512
+db 8
+dw 36
+db 2
+dw 64
+dw 65535
+db 0xF0
+dw 16
+dw 18
+dw 2
+dd 0
+dd 0
+
+db 0
+db 0
+db 0x29
+dd 0
+db "BIOSBOOTLDR"
+db "        "
+times 28 db 0 ; Leave space for a FAT32 EBPB
+
+skip_fat:
 cld
 cli
 
@@ -38,32 +64,18 @@ call console_print
 mov bx, date_message
 call console_print
 
-mov ax, 1
+mov al, 1
 mov bx, 0x7E00
-mov cl, 1
+xor ch, ch
+mov cl, 2
+xor dh, dh
 mov dl, byte[boot_drive]
 call disk_read
 jc disk_error
 
 call enable_a20
 
-mov ax, 2
-mov bx, kernel_address
-mov cl, 32
-mov dl, byte[boot_drive]
-call disk_read
-jc disk_error
-
-xor ax, ax
-mov bx, ax
-mov cx, ax
-xor dh, dh
-mov dl, byte[boot_drive]
-mov di, ax
-mov si, ax
-mov fs, ax
-mov gs, ax
-jmp kernel_address
+jmp bootloader_continue
 
 disk_error:
 mov bx, disk_error_message
@@ -74,8 +86,8 @@ jmp $
 %include "src/console.asm"
 %include "src/disk.asm"
 
-boot_message: db "Started BIOS-BOOTLOADER rev. 003", 0
-date_message: db "Software dated Oct. 01, 2023", 0
+boot_message: db "Started BIOS-BOOTLOADER rev. 004", 0
+date_message: db "Software dated Oct. 02, 2023", 0
 
 disk_error_message: db "Unable to load data from disk", 0
 
@@ -173,7 +185,53 @@ jnc .done
 
 .skip_fast_a20:
 
+in al, 0xEE
+
+call check_a20
+jnc .done
+
+cli
+
+call .kwait
+mov al, 0xAD
+out 0x64, al
+
+call .kwait
+mov al, 0xD0
+out 0x64, al
+
+call .kwait2
+in al, 0x60
+push ax
+
+call .kwait
+pop ax
+or al, 2
+out 0x60, al
+
+call .kwait
+mov al, 0xAE
+out 0x64, al
+
+call .kwait
+sti
+
+call check_a20
+jnc .done
+
 jmp no_a20
+
+.kwait:
+in al, 0x64
+test al, 2
+jnz .kwait
+ret
+
+.kwait2:
+in al, 0x64
+test al, 1
+jz .kwait2
+ret
 
 .done:
 pop ax
@@ -185,5 +243,36 @@ call console_print
 jmp $
 
 no_a20_message: db "ERROR: Unable to enable the A20 line", 0
+
+bootloader_continue:
+;mov ax, 2
+;mov bx, kernel_address
+;mov cl, 32
+;mov dl, byte[boot_drive]
+;call disk_read_ext
+;jc disk_error
+
+mov al, 32
+mov bx, kernel_address
+xor ch, ch
+mov cl, 3
+xor dh, dh
+mov dl, byte[boot_drive]
+call disk_read
+jc disk_error
+
+xor ax, ax
+mov bx, ax
+mov cx, ax
+mov dh, ah
+mov dl, byte[boot_drive]
+mov di, ax
+mov si, ax
+mov fs, ax
+mov gs, ax
+
+jmp kernel_address
+
+;%include "src/disk_ext.asm"
 
 times 512 - ($ - extended) db 0

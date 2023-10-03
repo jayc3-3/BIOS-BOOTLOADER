@@ -8,82 +8,25 @@
 
 ;
 ; disk.asm
-; INT 13h disk functions
+; Simple INT 13h disk functions
 ;
 
-disk_read: ; Input: AX = LBA, CL = Sectors to read, DL = Drive; Output: [ES:BX] = Data read from disk, Carry Flag = Set on error
-pusha
+disk_read: ; Input: AL = Sectors to read, CH = Cylinder, CL = First sector, DH = Head, DL = Drive; Output: [ES:BX] = Data read from disk, Carry Flag = Set on error
 push bx
+push ax
 clc
 
-mov bl, cl
-
-mov byte[.drive], dl
-xor dx, dx
-
-push ax
-mov al, 63
-mov cl, 16
-mul cl
-mov cx, ax
-pop ax
-
-push ax
-xor dx, dx
-div cx
-and ax, 1023
-mov word[.cylinder], ax
-pop ax
-
-push ax
-mov cl, 63
-div cl
-xor ah, ah
-
-mov cl, 16
-div cl
-
-mov al, ah
-mov byte[.head], al
-pop ax
-
-push ax
-mov cl, 63
-div cl
-shr ax, 8
-inc ax
-
-and ax, 63
-mov byte[.sector], al
-pop ax
-
-mov dl, bl
-pop bx
-push dx
 mov ah, 2
-mov al, dl
-mov cx, word[.cylinder]
-shl cx, 8
-mov cl, byte[.sector]
-mov dh, byte[.head]
-mov dl, byte[.drive]
 int 0x13
 jc .error
-cmp ah, 0
-jne .error
-pop dx
-cmp al, dl
+pop bx
+cmp al, bl
 jne .error
 
 .done:
-popa
+pop bx
 ret
 
 .error:
 stc
 jmp .done
-
-.cylinder: dw 0
-.head:     db 0
-.sector:   db 0
-.drive:    db 0
