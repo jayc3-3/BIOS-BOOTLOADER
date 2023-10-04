@@ -14,32 +14,9 @@
 org 0x7C00
 bits 16
 
-jmp short skip_fat
-nop
+db 0xEB, 0x3C, 0x90
+times 87 db 0 ; Leave space for FAT
 
-db "BIOSBTLR"
-dw 512
-db 8
-dw 36
-db 2
-dw 64
-dw 65535
-db 0xF0
-dw 16
-dw 18
-dw 2
-dd 0
-dd 0
-
-db 0
-db 0
-db 0x29
-dd 0
-db "BIOSBOOTLDR"
-db "        "
-times 28 db 0 ; Leave space for a FAT32 EBPB
-
-skip_fat:
 cld
 cli
 
@@ -58,6 +35,8 @@ mov sp, bp
 sti
 
 call console_init
+mov byte[console_cursorx], al
+mov byte[console_cursory], al
 
 mov bx, boot_message
 call console_print
@@ -86,8 +65,8 @@ jmp $
 %include "src/console.asm"
 %include "src/disk.asm"
 
-boot_message: db "Started BIOS-BOOTLOADER rev. 004", 0
-date_message: db "Software dated Oct. 02, 2023", 0
+boot_message: db "Started BIOS-BOOTLOADER rev. 004-1", 0
+date_message: db "Software dated Oct. 03, 2023", 0
 
 disk_error_message: db "Unable to load data from disk", 0
 
